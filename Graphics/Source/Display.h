@@ -1,4 +1,5 @@
 #pragma once
+#include "Input.h"
 #include <Windows.h>
 #include <utility>
 
@@ -24,6 +25,8 @@ public:
 
 	HWND mainWindowHandle = nullptr;
 	int* pixelBuffer = nullptr;
+	Mouse mouse;
+	Keyboard keyboard;
 
 	BITMAPINFO pixelbufferInfo = {};
 	WNDCLASS windowClassInfo = {};

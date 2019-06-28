@@ -36,9 +36,13 @@ void Display::InitializeDisplay()
 
 	pixelBuffer = new int[width*height];
 	ClearPixelbuffer();
+
+	mouse.relativeToWindow = mainWindowHandle;
+	mouse.screenHeight = height;
 }
 
 void Display::RunDisplay() {
+	Start();
 	while (running) {
 		{
 			//Handle window messages:
@@ -57,6 +61,7 @@ void Display::RunDisplay() {
 			DrawMaster();
 		}
 	}
+	End();
 }
 
 void Display::DestroyDisplay()
@@ -435,6 +440,8 @@ void Display::PresentPixelbufferToWindow() {
 }
 
 void Display::UpdateMaster() {
+	keyboard.UpdateKeyboard();
+	mouse.UpdateMouse();
 	Update();
 }
 
