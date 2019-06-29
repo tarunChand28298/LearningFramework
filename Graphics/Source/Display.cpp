@@ -23,7 +23,7 @@ void Display::InitializeDisplay()
 	windowClassInfo.lpszClassName = (LPCWSTR)L"MainWindowClassName";
 	RegisterClass(&windowClassInfo);
 
-	mainWindowHandle = CreateWindow((LPCWSTR)L"MainWindowClassName", (LPCWSTR)"", WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, GetModuleHandle(0), this);
+	mainWindowHandle = CreateWindow(L"MainWindowClassName", L"Game01", WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, width + 16, height + 39, nullptr, nullptr, GetModuleHandle(0), this);
 	ShowWindow(mainWindowHandle, SW_SHOW);
 
 	//Create pixelbuffer:
@@ -39,6 +39,8 @@ void Display::InitializeDisplay()
 
 	mouse.relativeToWindow = mainWindowHandle;
 	mouse.screenHeight = height;
+
+	previousFrameTime = std::chrono::steady_clock::now();
 }
 
 void Display::RunDisplay() {
@@ -413,7 +415,7 @@ void Display::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int c
 
 void Display::ClearPixelbuffer() {
 	for (int i = 0; i < height*width; i++) {
-		pixelBuffer[i] = 0x000000;
+		pixelBuffer[i] = 0xFFDDDDDD;
 	}
 }
 
@@ -443,6 +445,12 @@ void Display::UpdateMaster() {
 	keyboard.UpdateKeyboard();
 	mouse.UpdateMouse();
 	Update();
+	
+	std::chrono::steady_clock::time_point thisFrameTime = std::chrono::steady_clock::now();
+	std::chrono::duration<float> timeElapsed = thisFrameTime - previousFrameTime;
+	deltaTime = timeElapsed.count();
+
+	previousFrameTime = std::chrono::steady_clock::now();
 }
 
 void Display::DrawMaster() {
