@@ -413,9 +413,18 @@ void Display::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int c
 	}
 }
 
+void Display::DrawBitmap(int x, int y, const Bitmap& bitmap)
+{
+	for (int i = 0; i < bitmap.width; i++) {
+		for (int j = 0; j < bitmap.height; j++) {
+			PutPixel(x + i, y + j, bitmap.surface[i + j * bitmap.width]);
+		}
+	}
+}
+
 void Display::ClearPixelbuffer() {
 	for (int i = 0; i < height*width; i++) {
-		pixelBuffer[i] = 0xFFDDDDDD;
+		pixelBuffer[i] = defaultClearColour;
 	}
 }
 
