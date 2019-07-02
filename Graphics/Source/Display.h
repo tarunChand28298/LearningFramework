@@ -3,10 +3,58 @@
 #include <Windows.h>
 #include <utility>
 #include <chrono>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 enum DrawMode {
 	Fill,
 	Outline
+};
+
+struct Bitmap {
+	int width;
+	int height;
+	int* surface;
+
+	Bitmap(int _width, int _height, std::wstring filename) {
+		surface = new int[_width * _height];
+		width = _width;
+		height = _height;
+
+		{
+			std::ifstream file(filename, std::ios::binary);
+
+			BITMAPFILEHEADER fileHeader = {};
+			BITMAPINFOHEADER infoHeader = {};
+
+			file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+			file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
+			
+			file.seekg(fileHeader.bfOffBits);
+			for (int i = 0; i < width*height; i++) {
+				unsigned char r, g, b, p;
+				file.read(reinterpret_cast<char*>(&b), sizeof(char));
+				file.read(reinterpret_cast<char*>(&g), sizeof(char));
+				file.read(reinterpret_cast<char*>(&r), sizeof(char));
+				file.read(reinterpret_cast<char*>(&p), sizeof(char));
+
+				int finalColour = 0;
+				finalColour = p;
+				finalColour <<= 8;
+				finalColour |= r;
+				finalColour <<= 8;
+				finalColour |= g;
+				finalColour <<= 8;
+				finalColour |= b;
+
+				surface[i] = finalColour;
+			}
+		}
+	}
+	~Bitmap() {
+		delete[] surface;
+	}
 };
 
 class Display
@@ -33,6 +81,7 @@ public:
 	BITMAPINFO pixelbufferInfo = {};
 	WNDCLASS windowClassInfo = {};
 	std::chrono::steady_clock::time_point previousFrameTime;
+	static constexpr int defaultClearColour = 0x00000000;
 
 	void PutPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char p);
 	void PutPixel(int x, int y, int colour);
@@ -41,6 +90,7 @@ public:
 	void DrawCircle(int x, int y, int radius, int colour, DrawMode mode);				//Directly picked up from OLC pixel game engine.
 	void DrawRectangle(int x, int y, int width, int height, int colour, DrawMode mode);
 	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int colour, DrawMode mode);	//Directly picked up from OLC pixel game engine.
+	void DrawBitmap(int x, int y, const Bitmap& bitmap);						//32 bit bitmap images. (8 bits per channel with padding.)
 
 	void ClearPixelbuffer();
 	virtual void Start();
