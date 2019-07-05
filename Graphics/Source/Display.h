@@ -17,39 +17,37 @@ struct Bitmap {
 	int height;
 	int* surface;
 
-	Bitmap(int _width, int _height, std::wstring filename) {
-		surface = new int[_width * _height];
-		width = _width;
-		height = _height;
+	Bitmap(std::wstring filename) {
+		std::ifstream file(filename, std::ios::binary);
 
-		{
-			std::ifstream file(filename, std::ios::binary);
+		BITMAPFILEHEADER fileHeader = {};
+		BITMAPINFOHEADER infoHeader = {};
 
-			BITMAPFILEHEADER fileHeader = {};
-			BITMAPINFOHEADER infoHeader = {};
+		file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+		file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
+		
+		width = infoHeader.biWidth;
+		height = infoHeader.biHeight;
+		surface = new int[width * height];
 
-			file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
-			file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
-			
-			file.seekg(fileHeader.bfOffBits);
-			for (int i = 0; i < width*height; i++) {
-				unsigned char r, g, b, p;
-				file.read(reinterpret_cast<char*>(&b), sizeof(char));
-				file.read(reinterpret_cast<char*>(&g), sizeof(char));
-				file.read(reinterpret_cast<char*>(&r), sizeof(char));
-				file.read(reinterpret_cast<char*>(&p), sizeof(char));
+		file.seekg(fileHeader.bfOffBits);
+		for (int i = 0; i < width*height; i++) {
+			unsigned char r, g, b, p;
+			file.read(reinterpret_cast<char*>(&b), sizeof(char));
+			file.read(reinterpret_cast<char*>(&g), sizeof(char));
+			file.read(reinterpret_cast<char*>(&r), sizeof(char));
+			file.read(reinterpret_cast<char*>(&p), sizeof(char));
 
-				int finalColour = 0;
-				finalColour = p;
-				finalColour <<= 8;
-				finalColour |= r;
-				finalColour <<= 8;
-				finalColour |= g;
-				finalColour <<= 8;
-				finalColour |= b;
+			int finalColour = 0;
+			finalColour = p;
+			finalColour <<= 8;
+			finalColour |= r;
+			finalColour <<= 8;
+			finalColour |= g;
+			finalColour <<= 8;
+			finalColour |= b;
 
-				surface[i] = finalColour;
-			}
+			surface[i] = finalColour;
 		}
 	}
 	~Bitmap() {
